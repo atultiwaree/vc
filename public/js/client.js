@@ -113,14 +113,14 @@ const buttons = {
     showAudioBtn: true,
     showVideoBtn: true,
     showScreenBtn: true,
-    showRecordStreamBtn: true,
-    showChatRoomBtn: true,
-    showCaptionRoomBtn: true,
+    showRecordStreamBtn: false,
+    showChatRoomBtn: false,
+    showCaptionRoomBtn: false,
     showMyHandBtn: true,
     showWhiteboardBtn: true,
     showFileShareBtn: true,
-    showMySettingsBtn: true,
-    showAboutBtn: true, // Please keep me always true, Thank you!
+    showMySettingsBtn: false,
+    showAboutBtn: false, // Please keep me always true, Thank you!
   },
   chat: {
     showSaveMessageBtn: true,
@@ -202,7 +202,7 @@ let callElapsedTime;
 let recStartTime;
 let recElapsedTime;
 let videolifyTheme = "neon"; // neon - dark - forest - ghost ...
-let BtnsBar = "vertical"; // vertical - horizontal
+let BtnsBar = "horizontal"; // vertical - horizontal
 let pinVideoPositionSelect;
 let swalBackground = "rgba(0, 0, 0)"; // black - #16171b - transparent ...
 let peerGeo;
@@ -629,11 +629,7 @@ function setButtonsToolTip() {
   // video URL player
   setTippy(videoUrlCloseBtn, "Close the video player", "right-start");
   setTippy(videoAudioCloseBtn, "Close the video player", "right-start");
-  setTippy(
-    msgerVideoUrlBtn,
-    "Share a video or audio to all participants",
-    "top"
-  );
+  setTippy(msgerVideoUrlBtn, "Share a video or audio to all participants", "top");
 }
 
 /**
@@ -659,8 +655,7 @@ function getPeerInfo() {
   return {
     detectRTCversion: DetectRTC.version,
     isWebRTCSupported: DetectRTC.isWebRTCSupported,
-    isDesktopDevice:
-      !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
+    isDesktopDevice: !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
     isMobileDevice: DetectRTC.isMobileDevice,
     isTabletDevice: isTabletDevice,
     isIPadDevice: isIPadDevice,
@@ -693,12 +688,7 @@ function getSignalingServer() {
   if (isHttps) {
     return "https://" + location.hostname;
   }
-  return (
-    "http" +
-    (location.hostname == "localhost" ? "" : "s") +
-    "://" +
-    location.hostname
-  );
+  return "http" + (location.hostname == "localhost" ? "" : "s") + "://" + location.hostname;
 }
 
 /**
@@ -729,8 +719,7 @@ function getRoomId() {
  */
 function makeId(length) {
   let result = "";
-  let characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -861,14 +850,9 @@ async function sendToServer(msg, config = {}) {
  * @param {object} config data
  */
 async function sendToDataChannel(config) {
-  if (
-    thereIsPeerConnections() &&
-    typeof config === "object" &&
-    config !== null
-  ) {
+  if (thereIsPeerConnections() && typeof config === "object" && config !== null) {
     for (let peer_id in chatDataChannels) {
-      if (chatDataChannels[peer_id].readyState === "open")
-        await chatDataChannels[peer_id].send(JSON.stringify(config));
+      if (chatDataChannels[peer_id].readyState === "open") await chatDataChannels[peer_id].send(JSON.stringify(config));
     }
   }
 }
@@ -1031,9 +1015,7 @@ async function whoAreYou() {
     imageUrl: welcomeImg,
     title: "Enter your name",
     input: "text",
-    inputValue: window.localStorage.peer_name
-      ? window.localStorage.peer_name
-      : "",
+    inputValue: window.localStorage.peer_name ? window.localStorage.peer_name : "",
     html: `<br>
         <div style="padding: 10px;">
         <button id="initAudioBtn" class="${className.audioOn}" onclick="handleAudio(event, true)"></button>
@@ -1214,10 +1196,7 @@ async function handleAddPeer(config) {
       peer_name: peers[peer_id]["peer_name"],
     });
   }
-  console.log(
-    "[RTCPeerConnection] - CONNECTED TO",
-    JSON.stringify(connectedPeersName)
-  );
+  console.log("[RTCPeerConnection] - CONNECTED TO", JSON.stringify(connectedPeersName));
   // userLog('info', 'Connected to: ' + JSON.stringify(connectedPeersName));
 
   await handlePeersConnectionStatus(peer_id);
@@ -1299,9 +1278,7 @@ async function handleOnTrack(peer_id, peers) {
     });
     if (event.streams && event.streams[0]) {
       console.log("[ON TRACK] - peers", peers);
-      remoteVideoStream
-        ? attachMediaStream(remoteVideoStream, event.streams[0])
-        : loadRemoteMediaStream(event.streams[0], peers, peer_id);
+      remoteVideoStream ? attachMediaStream(remoteVideoStream, event.streams[0]) : loadRemoteMediaStream(event.streams[0], peers, peer_id);
     } else {
       console.log("[ON TRACK] - SCREEN SHARING", {
         peer_id: peer_id,
@@ -1309,10 +1286,7 @@ async function handleOnTrack(peer_id, peers) {
         kind: kind,
       });
       // attach newStream with screen share video and audio already existing
-      let inboundStream = new MediaStream([
-        event.track,
-        remoteVideoStream.srcObject.getAudioTracks()[0],
-      ]);
+      let inboundStream = new MediaStream([event.track, remoteVideoStream.srcObject.getAudioTracks()[0]]);
       attachMediaStream(remoteVideoStream, inboundStream);
     }
   };
@@ -1326,9 +1300,7 @@ async function handleOnTrack(peer_id, peers) {
 async function handleAddTracks(peer_id) {
   let peer_name = allPeers[peer_id]["peer_name"];
   await localMediaStream.getTracks().forEach((track) => {
-    console.log(
-      "[ADD TRACK] to Peer Name [" + peer_name + "] kind - " + track.kind
-    );
+    console.log("[ADD TRACK] to Peer Name [" + peer_name + "] kind - " + track.kind);
     peerConnections[peer_id].addTrack(track, localMediaStream);
   });
 }
@@ -1453,12 +1425,9 @@ function handleSessionDescription(config) {
                 if (needToCreateOffer) {
                   needToCreateOffer = false;
                   handleRtcOffer(peer_id);
-                  console.log(
-                    "[RTCSessionDescription] - NEED TO CREATE OFFER",
-                    {
-                      peer_id: peer_id,
-                    }
-                  );
+                  console.log("[RTCSessionDescription] - NEED TO CREATE OFFER", {
+                    peer_id: peer_id,
+                  });
                 }
               })
               .catch((err) => {
@@ -1485,11 +1454,9 @@ function handleIceCandidate(config) {
   let peer_id = config.peer_id;
   let ice_candidate = config.ice_candidate;
   // https://developer.mozilla.org/en-US/docs/Web/API/RTCIceCandidate
-  peerConnections[peer_id]
-    .addIceCandidate(new RTCIceCandidate(ice_candidate))
-    .catch((err) => {
-      console.error("[Error] addIceCandidate", err);
-    });
+  peerConnections[peer_id].addIceCandidate(new RTCIceCandidate(ice_candidate)).catch((err) => {
+    console.error("[Error] addIceCandidate", err);
+  });
 }
 
 /**
@@ -1500,9 +1467,7 @@ function handleIceCandidate(config) {
 function handleDisconnect(reason) {
   console.log("Disconnected from signaling server", { reason: reason });
   for (let peer_id in peerMediaElements) {
-    peerMediaElements[peer_id].parentNode.removeChild(
-      peerMediaElements[peer_id]
-    );
+    peerMediaElements[peer_id].parentNode.removeChild(peerMediaElements[peer_id]);
     adaptAspectRatio();
   }
   for (let peer_id in peerConnections) {
@@ -1529,9 +1494,7 @@ function handleRemovePeer(config) {
   let peer_id = config.peer_id;
 
   if (peer_id in peerMediaElements) {
-    peerMediaElements[peer_id].parentNode.removeChild(
-      peerMediaElements[peer_id]
-    );
+    peerMediaElements[peer_id].parentNode.removeChild(peerMediaElements[peer_id]);
     adaptAspectRatio();
   }
   if (peer_id in peerConnections) peerConnections[peer_id].close();
@@ -1580,33 +1543,18 @@ function setTheme(theme) {
       document.documentElement.style.setProperty("--wb-bg", "#000");
       document.documentElement.style.setProperty("--wb-hbg", "#4e7596");
       document.documentElement.style.setProperty("--btn-bg", "rgb(44, 48, 85)");
-      document.documentElement.style.setProperty(
-        "--btn-color",
-        "rgb(0, 255, 149)"
-      );
+      document.documentElement.style.setProperty("--btn-color", "rgb(0, 255, 149)");
       document.documentElement.style.setProperty("--btn-opc", "1");
       document.documentElement.style.setProperty("--btns-left", "20px");
-      document.documentElement.style.setProperty(
-        "--my-settings-label-color",
-        "rgb(0, 140, 255)"
-      );
-      document.documentElement.style.setProperty(
-        "--box-shadow",
-        "3px 3px 6px #00bfff, -3px -3px 6px #ba55d3"
-      );
+      document.documentElement.style.setProperty("--my-settings-label-color", "rgb(0, 140, 255)");
+      document.documentElement.style.setProperty("--box-shadow", "3px 3px 6px #00bfff, -3px -3px 6px #ba55d3");
       break;
     case "dark":
       // dark theme
       swalBackground = "rgba(0, 0, 0)";
       document.documentElement.style.setProperty("--body-bg", "#16171b");
-      document.documentElement.style.setProperty(
-        "--msger-bg",
-        "radial-gradient( #383838, #000000)"
-      );
-      document.documentElement.style.setProperty(
-        "--msger-private-bg",
-        "rgb(18, 82, 141)"
-      );
+      document.documentElement.style.setProperty("--msger-bg", "radial-gradient( #383838, #000000)");
+      document.documentElement.style.setProperty("--msger-private-bg", "rgb(18, 82, 141)");
       document.documentElement.style.setProperty("--left-msg-bg", "#474953");
       document.documentElement.style.setProperty("--private-msg-bg", "#f77070");
       document.documentElement.style.setProperty("--right-msg-bg", "#0a0b0c");
@@ -1616,23 +1564,14 @@ function setTheme(theme) {
       document.documentElement.style.setProperty("--btn-color", "white");
       document.documentElement.style.setProperty("--btn-opc", "1");
       document.documentElement.style.setProperty("--btns-left", "20px");
-      document.documentElement.style.setProperty(
-        "--my-settings-label-color",
-        "limegreen"
-      );
-      document.documentElement.style.setProperty(
-        "--box-shadow",
-        "3px 3px 6px #0a0b0c, -3px -3px 6px #222328"
-      );
+      document.documentElement.style.setProperty("--my-settings-label-color", "limegreen");
+      document.documentElement.style.setProperty("--box-shadow", "3px 3px 6px #0a0b0c, -3px -3px 6px #222328");
       break;
     case "forest":
       // forest theme
       swalBackground = "rgba(0, 0, 0)";
       document.documentElement.style.setProperty("--body-bg", "black");
-      document.documentElement.style.setProperty(
-        "--msger-bg",
-        "linear-gradient(to right, rgb(52, 232, 158), rgb(15, 52, 67))"
-      );
+      document.documentElement.style.setProperty("--msger-bg", "linear-gradient(to right, rgb(52, 232, 158), rgb(15, 52, 67))");
       document.documentElement.style.setProperty("--msger-private-bg", "black");
       document.documentElement.style.setProperty("--left-msg-bg", "#4d8051");
       document.documentElement.style.setProperty("--private-msg-bg", "#008cff");
@@ -1643,14 +1582,8 @@ function setTheme(theme) {
       document.documentElement.style.setProperty("--btn-color", "black");
       document.documentElement.style.setProperty("--btn-opc", "1");
       document.documentElement.style.setProperty("--btns-left", "20px");
-      document.documentElement.style.setProperty(
-        "--my-settings-label-color",
-        "limegreen"
-      );
-      document.documentElement.style.setProperty(
-        "--box-shadow",
-        "3px 3px 6px #00ff5e, -3px -3px 6px #5eff00"
-      );
+      document.documentElement.style.setProperty("--my-settings-label-color", "limegreen");
+      document.documentElement.style.setProperty("--box-shadow", "3px 3px 6px #00ff5e, -3px -3px 6px #5eff00");
       break;
     case "ghost":
       // ghost theme
@@ -1665,22 +1598,10 @@ function setTheme(theme) {
       document.documentElement.style.setProperty("--btn-opc", "0.7");
       document.documentElement.style.setProperty("--btns-left", "20px");
       document.documentElement.style.setProperty("--box-shadow", "0px");
-      document.documentElement.style.setProperty(
-        "--my-settings-label-color",
-        "limegreen"
-      );
-      document.documentElement.style.setProperty(
-        "--left-msg-bg",
-        "rgba(0, 0, 0, 0.7)"
-      );
-      document.documentElement.style.setProperty(
-        "--private-msg-bg",
-        "rgba(252, 110, 110, 0.7)"
-      );
-      document.documentElement.style.setProperty(
-        "--right-msg-bg",
-        "rgba(0, 0, 0, 0.7)"
-      );
+      document.documentElement.style.setProperty("--my-settings-label-color", "limegreen");
+      document.documentElement.style.setProperty("--left-msg-bg", "rgba(0, 0, 0, 0.7)");
+      document.documentElement.style.setProperty("--private-msg-bg", "rgba(252, 110, 110, 0.7)");
+      document.documentElement.style.setProperty("--right-msg-bg", "rgba(0, 0, 0, 0.7)");
       break;
     // ...
     default:
@@ -1705,24 +1626,15 @@ function setButtonsBarPosition(position) {
       document.documentElement.style.setProperty("--btns-left", "15px");
       document.documentElement.style.setProperty("--btns-margin-left", "0px");
       document.documentElement.style.setProperty("--btns-width", "40px");
-      document.documentElement.style.setProperty(
-        "--btns-flex-direction",
-        "column"
-      );
+      document.documentElement.style.setProperty("--btns-flex-direction", "column");
       break;
     case "horizontal":
       document.documentElement.style.setProperty("--btns-top", "95%");
       document.documentElement.style.setProperty("--btns-right", "25%");
       document.documentElement.style.setProperty("--btns-left", "50%");
-      document.documentElement.style.setProperty(
-        "--btns-margin-left",
-        "-300px"
-      );
+      document.documentElement.style.setProperty("--btns-margin-left", "-300px");
       document.documentElement.style.setProperty("--btns-width", "600px");
-      document.documentElement.style.setProperty(
-        "--btns-flex-direction",
-        "row"
-      );
+      document.documentElement.style.setProperty("--btns-flex-direction", "row");
       break;
     default:
       console.log("No position found");
@@ -1881,11 +1793,7 @@ function addChild(device, el, kind) {
       break;
   }
   el.appendChild(option);
-  selectors = [
-    getId("audioSource"),
-    getId("audioOutput"),
-    getId("videoSource"),
-  ];
+  selectors = [getId("audioSource"), getId("audioOutput"), getId("videoSource")];
 }
 
 /**
@@ -1902,10 +1810,7 @@ async function setupLocalMedia() {
   await getPeerGeoLocation();
 
   console.log("08. Requesting access to local audio - video inputs");
-  console.log(
-    "09. Supported constraints",
-    navigator.mediaDevices.getSupportedConstraints()
-  );
+  console.log("09. Supported constraints", navigator.mediaDevices.getSupportedConstraints());
 
   // default | qvgaVideo | vgaVideo | hdVideo | fhdVideo | 2kVideo | 4kVideo |
   let videoConstraints = useVideo ? getVideoConstraints("default") : false;
@@ -1934,9 +1839,7 @@ async function setupLocalMedia() {
   } catch (err) {
     console.error("[Error] - Access denied for audio - video device", err);
     playSound("alert");
-    openURL(
-      `/permission?roomId=${roomId}&getUserMediaError=${err.toString()} <br/> Check the common getusermedia errors <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">here<a/>`
-    );
+    openURL(`/permission?roomId=${roomId}&getUserMediaError=${err.toString()}`);
   }
 } // end [setup_local_stream]
 
@@ -2106,12 +2009,7 @@ async function loadLocalMedia(stream) {
     handleVideoPrivacyBtn(myLocalMedia.id, myPrivacyBtn.id);
   }
 
-  handleVideoPinUnpin(
-    myLocalMedia.id,
-    myVideoPinBtn.id,
-    myVideoWrap.id,
-    myLocalMedia.id
-  );
+  handleVideoPinUnpin(myLocalMedia.id, myVideoPinBtn.id, myVideoWrap.id, myLocalMedia.id);
 
   refreshMyVideoAudioStatus(localMediaStream);
 
@@ -2171,10 +2069,7 @@ async function loadRemoteMediaStream(stream, peers, peer_id) {
 
   remoteMediaStream = stream;
 
-  console.log(
-    "LOAD REMOTE MEDIA STREAM TRACKS - PeerName:[" + peer_name + "]",
-    remoteMediaStream.getTracks()
-  );
+  console.log("LOAD REMOTE MEDIA STREAM TRACKS - PeerName:[" + peer_name + "]", remoteMediaStream.getTracks());
 
   // remote video elements
   const remoteVideoWrap = document.createElement("div");
@@ -2319,14 +2214,9 @@ async function loadRemoteMediaStream(stream, peers, peer_id) {
   remoteMedia.setAttribute("id", peer_id + "_video");
   remoteMedia.setAttribute("playsinline", true);
   remoteMedia.autoplay = true;
-  isMobileDevice
-    ? (remoteMediaControls = false)
-    : (remoteMediaControls = remoteMediaControls);
-  remoteMedia.style.objectFit = peer_screen_status
-    ? "contain"
-    : "var(--video-object-fit)";
-  remoteMedia.style.name =
-    peer_id + (peer_screen_status ? "_typeScreen" : "_typeCam");
+  isMobileDevice ? (remoteMediaControls = false) : (remoteMediaControls = remoteMediaControls);
+  remoteMedia.style.objectFit = peer_screen_status ? "contain" : "var(--video-object-fit)";
+  remoteMedia.style.name = peer_id + (peer_screen_status ? "_typeScreen" : "_typeCam");
   remoteMedia.controls = remoteMediaControls;
 
   remoteVideoWrap.className = "Camera";
@@ -2355,13 +2245,7 @@ async function loadRemoteMediaStream(stream, peers, peer_id) {
   }
 
   // handle video pin/unpin
-  handleVideoPinUnpin(
-    remoteMedia.id,
-    remoteVideoPinBtn.id,
-    remoteVideoWrap.id,
-    peer_id,
-    peer_screen_status
-  );
+  handleVideoPinUnpin(remoteMedia.id, remoteVideoPinBtn.id, remoteVideoWrap.id, peer_id, peer_screen_status);
 
   // pin video on screen share detected
   if (peer_video_status && peer_screen_status) {
@@ -2525,12 +2409,7 @@ function setPeerAvatarImgName(videoAvatarImageId, peerName, useAvatar) {
     let avatarImgSize = isMobileDevice ? 128 : 256;
     videoAvatarImageElement.setAttribute(
       "src",
-      avatarApiUrl +
-        "?name=" +
-        peerName +
-        "&size=" +
-        avatarImgSize +
-        "&background=random&rounded=true"
+      avatarApiUrl + "?name=" + peerName + "&size=" + avatarImgSize + "&background=random&rounded=true"
     );
   } else {
     videoAvatarImageElement.setAttribute("src", avatarImg);
@@ -2543,12 +2422,7 @@ function setPeerAvatarImgName(videoAvatarImageId, peerName, useAvatar) {
  * @param {string} peerName me or peer name
  */
 function setPeerChatAvatarImgName(avatar, peerName) {
-  let avatarImg =
-    avatarApiUrl +
-    "?name=" +
-    peerName +
-    "&size=32" +
-    "&background=random&rounded=true";
+  let avatarImg = avatarApiUrl + "?name=" + peerName + "&size=32" + "&background=random&rounded=true";
 
   switch (avatar) {
     case "left":
@@ -2601,10 +2475,7 @@ function handleVideoPlayerFs(videoId, videoFullScreenBtnId, peer_id = null) {
   // on button click go on FS mobile/desktop
   videoFullScreenBtn.addEventListener("click", (e) => {
     if (videoPlayer.classList.contains("videoCircle")) {
-      return userLog(
-        "toast",
-        "Full Screen isn't allowed until privacy mode is ON"
-      );
+      return userLog("toast", "Full Screen isn't allowed until privacy mode is ON");
     }
     gotoFS();
   });
@@ -2612,10 +2483,7 @@ function handleVideoPlayerFs(videoId, videoFullScreenBtnId, peer_id = null) {
   // on video click go on FS
   videoPlayer.addEventListener("click", (e) => {
     if (videoPlayer.classList.contains("videoCircle")) {
-      return userLog(
-        "toast",
-        "Full Screen isn't allowed until privacy mode is ON"
-      );
+      return userLog("toast", "Full Screen isn't allowed until privacy mode is ON");
     }
     // not mobile on click go on FS or exit from FS
     if (!isMobileDevice) {
@@ -2637,10 +2505,7 @@ function handleVideoPlayerFs(videoId, videoFullScreenBtnId, peer_id = null) {
       }
     } else {
       // handle local video fs
-      if (
-        myVideoStatusIcon.className === className.videoOn ||
-        isScreenStreaming
-      ) {
+      if (myVideoStatusIcon.className === className.videoOn || isScreenStreaming) {
         handleFSVideo();
       } else {
         showMsg();
@@ -2707,10 +2572,7 @@ function handleFileDragAndDrop(elemId, peer_id, itsMe = false) {
       return userLog("warning", "You cannot send files to yourself.");
     }
     if (sendInProgress) {
-      return userLog(
-        "warning",
-        "Please wait for the previous file to be sent."
-      );
+      return userLog("warning", "Please wait for the previous file to be sent.");
     }
     if (e.dataTransfer.items && e.dataTransfer.items.length > 1) {
       return userLog("warning", "Please drag and drop a single file.");
@@ -2721,11 +2583,7 @@ function handleFileDragAndDrop(elemId, peer_id, itsMe = false) {
       let item = e.dataTransfer.items[0].webkitGetAsEntry();
       console.log("Drag and drop", item);
       if (item.isDirectory) {
-        return userLog(
-          "warning",
-          "Please drag and drop a single file not a folder.",
-          "top-end"
-        );
+        return userLog("warning", "Please drag and drop a single file not a folder.", "top-end");
       }
       let file = e.dataTransfer.items[0].getAsFile();
       sendFileInformations(file, peer_id);
@@ -2807,16 +2665,10 @@ function handleVideoPinUnpin(elemId, pnId, camId, peerId, isScreen = false) {
       } else {
         if (pinnedVideoPlayerId != videoPlayer.id) {
           isVideoPinned = true;
-          return userLog(
-            "toast",
-            "Another video seems pinned, unpin it before to pin this one",
-            5000
-          );
+          return userLog("toast", "Another video seems pinned, unpin it before to pin this one", 5000);
         }
-        if (!isScreenStreaming)
-          videoPlayer.style.objectFit = "var(--video-object-fit)";
-        if (isScreen || videoPlayer.style.name == peerId + "_typeScreen")
-          videoPlayer.style.objectFit = "contain";
+        if (!isScreenStreaming) videoPlayer.style.objectFit = "var(--video-object-fit)";
+        if (isScreen || videoPlayer.style.name == peerId + "_typeScreen") videoPlayer.style.objectFit = "contain";
         videoPinMediaContainer.removeChild(cam);
         cam.className = "Camera";
         videoMediaContainer.appendChild(cam);
@@ -2871,12 +2723,7 @@ function toggleVideoPin(position) {
  */
 function removeVideoPinMediaContainer(peer_id, force_remove = false) {
   //alert(pinnedVideoPlayerId + '==' + peer_id);
-  if (
-    (isVideoPinned &&
-      (pinnedVideoPlayerId == peer_id + "_video" ||
-        pinnedVideoPlayerId == peer_id)) ||
-    force_remove
-  ) {
+  if ((isVideoPinned && (pinnedVideoPlayerId == peer_id + "_video" || pinnedVideoPlayerId == peer_id)) || force_remove) {
     const videoPinMediaContainer = getId("videoPinMediaContainer");
     const videoMediaContainer = getId("videoMediaContainer");
     videoPinMediaContainer.style.display = "none";
@@ -2901,10 +2748,7 @@ function handleVideoToImg(videoStream, videoToImgBtn, peer_id = null) {
   let video = getId(videoStream);
   videoBtn.addEventListener("click", () => {
     if (video.classList.contains("videoCircle")) {
-      return userLog(
-        "toast",
-        "Snapshot isn't allowed until privacy mode is ON"
-      );
+      return userLog("toast", "Snapshot isn't allowed until privacy mode is ON");
     }
     if (peer_id !== null) {
       // handle remote video snapshot
@@ -3058,11 +2902,7 @@ function setSwapCameraBtn() {
  * Check if i can share the screen, if yes show button else hide it
  */
 function setScreenShareBtn() {
-  if (
-    !isMobileDevice &&
-    (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) &&
-    buttons.main.showScreenBtn
-  ) {
+  if (!isMobileDevice && (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) && buttons.main.showScreenBtn) {
     isScreenSharingSupported = true;
     screenShareBtn.addEventListener("click", async (e) => {
       await toggleScreenSharing();
@@ -3215,19 +3055,9 @@ function setChatRoomBtn() {
     playSound("click");
     showChatOnMessage = e.currentTarget.checked;
     if (showChatOnMessage) {
-      msgPopup(
-        "info",
-        "Chat will be shown, when you'll receive a new message",
-        "top-end",
-        3000
-      );
+      msgPopup("info", "Chat will be shown, when you'll receive a new message", "top-end", 3000);
     } else {
-      msgPopup(
-        "info",
-        "Chat won't will be shown, when you'll receive a new message",
-        "top-end",
-        3000
-      );
+      msgPopup("info", "Chat won't will be shown, when you'll receive a new message", "top-end", 3000);
     }
   });
 
@@ -3391,9 +3221,7 @@ function setMyWhiteboardBtn() {
   });
   whiteboardGhostButton.addEventListener("click", (e) => {
     wbIsBgTransparent = !wbIsBgTransparent;
-    setWhiteboardBgColor(
-      wbIsBgTransparent ? "rgba(0, 0, 0, 0.100)" : wbBackgroundColorEl.value
-    );
+    setWhiteboardBgColor(wbIsBgTransparent ? "rgba(0, 0, 0, 0.100)" : wbBackgroundColorEl.value);
   });
 }
 
@@ -3550,10 +3378,7 @@ function setupMySettings() {
   });
   // video object fit
   videoObjFitSelect.addEventListener("change", (e) => {
-    document.documentElement.style.setProperty(
-      "--video-object-fit",
-      videoObjFitSelect.value
-    );
+    document.documentElement.style.setProperty("--video-object-fit", videoObjFitSelect.value);
   });
   videoObjFitSelect.selectedIndex = 2; // cover
 
@@ -3622,11 +3447,7 @@ function refreshLocalMedia() {
   stopLocalVideoTrack();
   stopLocalAudioTrack();
 
-  navigator.mediaDevices
-    .getUserMedia(getAudioVideoConstraints())
-    .then(gotStream)
-    .then(gotDevices)
-    .catch(handleError);
+  navigator.mediaDevices.getUserMedia(getAudioVideoConstraints()).then(gotStream).then(gotDevices).catch(handleError);
 }
 
 /**
@@ -3638,12 +3459,8 @@ function getAudioVideoConstraints() {
   const videoSource = videoSelect.value;
   let videoConstraints = false;
   if (useVideo) {
-    videoConstraints = getVideoConstraints(
-      videoQualitySelect.value ? videoQualitySelect.value : "default"
-    );
-    videoConstraints["deviceId"] = videoSource
-      ? { exact: videoSource }
-      : undefined;
+    videoConstraints = getVideoConstraints(videoQualitySelect.value ? videoQualitySelect.value : "default");
+    videoConstraints["deviceId"] = videoSource ? { exact: videoSource } : undefined;
   }
   let audioConstraints = {
     deviceId: audioSource ? { exact: audioSource } : undefined,
@@ -3731,10 +3548,7 @@ function setLocalMaxFps(maxFrameRate) {
     })
     .catch((err) => {
       console.error("setLocalMaxFps", err);
-      userLog(
-        "error",
-        "Your device doesn't support the selected fps, please select the another one."
-      );
+      userLog("error", "Your device doesn't support the selected fps, please select the another one.");
     });
 }
 
@@ -3743,9 +3557,7 @@ function setLocalMaxFps(maxFrameRate) {
  */
 function setLocalVideoQuality() {
   if (!useVideo) return;
-  let videoConstraints = getVideoConstraints(
-    videoQualitySelect.value ? videoQualitySelect.value : "default"
-  );
+  let videoConstraints = getVideoConstraints(videoQualitySelect.value ? videoQualitySelect.value : "default");
   localMediaStream
     .getVideoTracks()[0]
     .applyConstraints(videoConstraints)
@@ -3756,10 +3568,7 @@ function setLocalVideoQuality() {
     .catch((err) => {
       videoQualitySelect.selectedIndex = videoQualitySelectedIndex;
       console.error("setLocalVideoQuality", err);
-      userLog(
-        "error",
-        "Your device doesn't support the selected video quality, please select the another one."
-      );
+      userLog("error", "Your device doesn't support the selected video quality, please select the another one.");
     });
 }
 
@@ -3785,8 +3594,7 @@ function attachSinkId(element, sinkId) {
       })
       .catch((err) => {
         let errorMessage = err;
-        if (err.name === "SecurityError")
-          errorMessage = `You need to use HTTPS for selecting audio output device: ${err}`;
+        if (err.name === "SecurityError") errorMessage = `You need to use HTTPS for selecting audio output device: ${err}`;
         console.error(errorMessage);
         // Jump back to first output device in the list as it's the default.
         audioOutputSelect.selectedIndex = 0;
@@ -3839,22 +3647,17 @@ function gotDevices(deviceInfos) {
 
     switch (deviceInfo.kind) {
       case "videoinput":
-        option.text =
-          `📹 ` + deviceInfo.label || `📹 camera ${videoSelect.length + 1}`;
+        option.text = `📹 ` + deviceInfo.label || `📹 camera ${videoSelect.length + 1}`;
         videoSelect.appendChild(option);
         break;
 
       case "audioinput":
-        option.text =
-          `🎤 ` + deviceInfo.label ||
-          `🎤 microphone ${audioInputSelect.length + 1}`;
+        option.text = `🎤 ` + deviceInfo.label || `🎤 microphone ${audioInputSelect.length + 1}`;
         audioInputSelect.appendChild(option);
         break;
 
       case "audiooutput":
-        option.text =
-          `🔈 ` + deviceInfo.label ||
-          `🔈 speaker ${audioOutputSelect.length + 1}`;
+        option.text = `🔈 ` + deviceInfo.label || `🔈 speaker ${audioOutputSelect.length + 1}`;
         audioOutputSelect.appendChild(option);
         break;
 
@@ -3864,11 +3667,7 @@ function gotDevices(deviceInfos) {
   } // end for devices
 
   selectors.forEach((select, selectorIndex) => {
-    if (
-      Array.prototype.slice
-        .call(select.childNodes)
-        .some((n) => n.value === values[selectorIndex])
-    ) {
+    if (Array.prototype.slice.call(select.childNodes).some((n) => n.value === values[selectorIndex])) {
       select.value = values[selectorIndex];
     }
   });
@@ -3882,10 +3681,7 @@ function handleError(err) {
   console.log("navigator.MediaDevices.getUserMedia error: ", err);
   switch (err.name) {
     case "OverconstrainedError":
-      userLog(
-        "error",
-        "GetUserMedia: Your device doesn't support the selected video quality or fps, please select the another one."
-      );
+      userLog("error", "GetUserMedia: Your device doesn't support the selected video quality or fps, please select the another one.");
       break;
     default:
       userLog("error", "GetUserMedia error " + err);
@@ -4053,10 +3849,7 @@ async function shareRoomUrl() {
   }
 
   // something wrong or not supported navigator.share
-  if (
-    !isSupportedNavigatorShare ||
-    (isSupportedNavigatorShare && errorNavigatorShare)
-  ) {
+  if (!isSupportedNavigatorShare || (isSupportedNavigatorShare && errorNavigatorShare)) {
     playSound("newMessage");
     Swal.fire({
       background: swalBackground,
@@ -4140,8 +3933,7 @@ function shareRoomByEmail(message) {
   let email = message.email;
   let subject = message.subject;
   let emailBody = message.body;
-  document.location =
-    "mailto:" + email + "?subject=" + subject + "&body=" + emailBody;
+  document.location = "mailto:" + email + "?subject=" + subject + "&body=" + emailBody;
 }
 
 /**
@@ -4154,23 +3946,16 @@ function handleAudio(e, init, force = null) {
   if (!useAudio) return;
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getAudioTracks
 
-  localMediaStream.getAudioTracks()[0].enabled =
-    force != null ? force : !localMediaStream.getAudioTracks()[0].enabled;
+  localMediaStream.getAudioTracks()[0].enabled = force != null ? force : !localMediaStream.getAudioTracks()[0].enabled;
   myAudioStatus = localMediaStream.getAudioTracks()[0].enabled;
 
   force != null
     ? (e.className = myAudioStatus ? className.audioOn : className.audioOff)
-    : (e.target.className = myAudioStatus
-        ? className.audioOn
-        : className.audioOff);
+    : (e.target.className = myAudioStatus ? className.audioOn : className.audioOff);
 
   if (init) {
     audioBtn.className = myAudioStatus ? className.audioOn : className.audioOff;
-    setTippy(
-      initAudioBtn,
-      myAudioStatus ? "Click to mute" : "Start to unmute",
-      "top"
-    );
+    setTippy(initAudioBtn, myAudioStatus ? "Click to mute" : "Start to unmute", "top");
   }
   setMyAudioStatus(myAudioStatus);
 }
@@ -4185,23 +3970,16 @@ function handleVideo(e, init, force = null) {
   if (!useVideo) return;
   // https://developer.mozilla.org/en-US/docs/Web/API/MediaStream/getVideoTracks
 
-  localMediaStream.getVideoTracks()[0].enabled =
-    force != null ? force : !localMediaStream.getVideoTracks()[0].enabled;
+  localMediaStream.getVideoTracks()[0].enabled = force != null ? force : !localMediaStream.getVideoTracks()[0].enabled;
   myVideoStatus = localMediaStream.getVideoTracks()[0].enabled;
 
   force != null
     ? (e.className = myVideoStatus ? className.videoOn : className.videoOff)
-    : (e.target.className = myVideoStatus
-        ? className.videoOn
-        : className.videoOff);
+    : (e.target.className = myVideoStatus ? className.videoOn : className.videoOff);
 
   if (init) {
     videoBtn.className = myVideoStatus ? className.videoOn : className.videoOff;
-    setTippy(
-      initVideoBtn,
-      myVideoStatus ? "Turn off video" : "Turn on video",
-      "top"
-    );
+    setTippy(initVideoBtn, myVideoStatus ? "Turn off video" : "Turn on video", "top");
   }
   setMyVideoStatus(myVideoStatus);
 }
@@ -4243,8 +4021,7 @@ async function swapCamera() {
  * Stop Local Video Track
  */
 async function stopLocalVideoTrack() {
-  if (useVideo || !isScreenStreaming)
-    localMediaStream.getVideoTracks()[0].stop();
+  if (useVideo || !isScreenStreaming) localMediaStream.getVideoTracks()[0].stop();
 }
 
 /**
@@ -4291,10 +4068,8 @@ async function toggleScreenSharing() {
       await refreshMyStreamToPeers(screenMediaPromise);
       myVideo.classList.toggle("mirror");
       setScreenSharingStatus(isScreenStreaming);
-      if (myVideoAvatarImage && !useVideo)
-        myVideoAvatarImage.style.display = isScreenStreaming ? "none" : "block";
-      if (myPrivacyBtn)
-        myPrivacyBtn.style.display = isScreenStreaming ? "none" : "inline";
+      if (myVideoAvatarImage && !useVideo) myVideoAvatarImage.style.display = isScreenStreaming ? "none" : "block";
+      if (myPrivacyBtn) myPrivacyBtn.style.display = isScreenStreaming ? "none" : "inline";
       if (isScreenStreaming || isVideoPinned) getId("myVideoPinBtn").click();
     }
   } catch (err) {
@@ -4309,11 +4084,7 @@ async function toggleScreenSharing() {
  */
 function setScreenSharingStatus(status) {
   screenShareBtn.className = status ? className.screenOff : className.screenOn;
-  setTippy(
-    screenShareBtn,
-    status ? "Stop screen sharing" : "Start screen sharing",
-    "right-start"
-  );
+  setTippy(screenShareBtn, status ? "Stop screen sharing" : "Start screen sharing", "right-start");
 }
 
 /**
@@ -4347,11 +4118,7 @@ function toggleFullScreen() {
       isDocumentOnFullScreen = false;
     }
   }
-  setTippy(
-    fullScreenBtn,
-    isDocumentOnFullScreen ? "Exit full screen" : "View full screen",
-    "right-start"
-  );
+  setTippy(fullScreenBtn, isDocumentOnFullScreen ? "Exit full screen" : "View full screen", "right-start");
 }
 
 /**
@@ -4370,9 +4137,7 @@ async function refreshMyStreamToPeers(stream, localAudioTrackChange = false) {
     let peer_name = allPeers[peer_id]["peer_name"];
 
     // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/getSenders
-    let videoSender = peerConnections[peer_id]
-      .getSenders()
-      .find((s) => (s.track ? s.track.kind === "video" : false));
+    let videoSender = peerConnections[peer_id].getSenders().find((s) => (s.track ? s.track.kind === "video" : false));
     console.log("CHECK VIDEO SENDER - " + peer_name, videoSender);
 
     if (videoSender) {
@@ -4398,18 +4163,13 @@ async function refreshMyStreamToPeers(stream, localAudioTrackChange = false) {
 
     let myAudioTrack; // audio Track to replace to peers
 
-    if (
-      stream.getAudioTracks()[0] &&
-      (localAudioTrackChange || isScreenStreaming)
-    ) {
+    if (stream.getAudioTracks()[0] && (localAudioTrackChange || isScreenStreaming)) {
       myAudioTrack = stream.getAudioTracks()[0];
     } else {
       myAudioTrack = localMediaStream.getAudioTracks()[0];
     }
     // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/getSenders
-    let audioSender = peerConnections[peer_id]
-      .getSenders()
-      .find((s) => (s.track ? s.track.kind === "audio" : false));
+    let audioSender = peerConnections[peer_id].getSenders().find((s) => (s.track ? s.track.kind === "audio" : false));
 
     if (audioSender) {
       // https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpSender/replaceTrack
@@ -4457,17 +4217,11 @@ async function refreshMyLocalStream(stream, localAudioTrackChange = false) {
     console.log("Refresh my local media stream VIDEO - AUDIO");
     newStream = new MediaStream([
       stream.getVideoTracks()[0],
-      localAudioTrackChange
-        ? stream.getAudioTracks()[0]
-        : localMediaStream.getAudioTracks()[0],
+      localAudioTrackChange ? stream.getAudioTracks()[0] : localMediaStream.getAudioTracks()[0],
     ]);
   } else {
     console.log("Refresh my local media stream AUDIO");
-    newStream = new MediaStream([
-      localAudioTrackChange
-        ? stream.getAudioTracks()[0]
-        : localMediaStream.getAudioTracks()[0],
-    ]);
+    newStream = new MediaStream([localAudioTrackChange ? stream.getAudioTracks()[0] : localMediaStream.getAudioTracks()[0]]);
   }
 
   localMediaStream = newStream;
@@ -4479,9 +4233,7 @@ async function refreshMyLocalStream(stream, localAudioTrackChange = false) {
   }
 
   // adapt video object fit on screen streaming
-  getId("myVideo").style.objectFit = isScreenStreaming
-    ? "contain"
-    : "var(--video-object-fit)";
+  getId("myVideo").style.objectFit = isScreenStreaming ? "contain" : "var(--video-object-fit)";
 
   // log newStream devices
   logStreamSettingsInfo("refreshMyLocalStream", localMediaStream);
@@ -4504,8 +4256,7 @@ async function refreshMyLocalStream(stream, localAudioTrackChange = false) {
    * If you want the webcam with video stream OFF, just disable it with the button (Stop the video),
    * before to stop the screen sharing.
    */
-  if (useVideo && myVideoStatus === false)
-    localMediaStream.getVideoTracks()[0].enabled = false;
+  if (useVideo && myVideoStatus === false) localMediaStream.getVideoTracks()[0].enabled = false;
 }
 
 /**
@@ -4516,10 +4267,7 @@ function startRecordingTime() {
   let rc = setInterval(function printTime() {
     if (isStreamRecording) {
       recElapsedTime = Date.now() - recStartTime;
-      myVideoParagraph.innerHTML =
-        myPeerName +
-        "&nbsp;&nbsp; 🔴 &nbsp; REC " +
-        getTimeToString(recElapsedTime);
+      myVideoParagraph.innerHTML = myPeerName + "&nbsp;&nbsp; 🔴 &nbsp; REC " + getTimeToString(recElapsedTime);
       return;
     }
     clearInterval(rc);
@@ -4560,12 +4308,7 @@ function startStreamRecording() {
     if (isMobileDevice) {
       // on mobile devices recording camera + audio
       mediaRecorder = new MediaRecorder(localMediaStream, options);
-      console.log(
-        "Created MediaRecorder",
-        mediaRecorder,
-        "with options",
-        options
-      );
+      console.log("Created MediaRecorder", mediaRecorder, "with options", options);
       handleMediaRecorder(mediaRecorder);
     } else {
       // on desktop devices recording screen + audio
@@ -4573,22 +4316,13 @@ function startStreamRecording() {
       const constraints = {
         video: { frameRate: { max: screenMaxFrameRate } },
       };
-      let recScreenStreamPromise =
-        navigator.mediaDevices.getDisplayMedia(constraints);
+      let recScreenStreamPromise = navigator.mediaDevices.getDisplayMedia(constraints);
       recScreenStreamPromise
         .then((screenStream) => {
-          const newStream = new MediaStream([
-            screenStream.getVideoTracks()[0],
-            localMediaStream.getAudioTracks()[0],
-          ]);
+          const newStream = new MediaStream([screenStream.getVideoTracks()[0], localMediaStream.getAudioTracks()[0]]);
           recScreenStream = newStream;
           mediaRecorder = new MediaRecorder(recScreenStream, options);
-          console.log(
-            "Created MediaRecorder",
-            mediaRecorder,
-            "with options",
-            options
-          );
+          console.log("Created MediaRecorder", mediaRecorder, "with options", options);
           isRecScreenStream = true;
           handleMediaRecorder(mediaRecorder);
         })
@@ -4728,9 +4462,7 @@ function downloadRecordedStream() {
  * @param {string} peer_id socket.id
  */
 function createChatDataChannel(peer_id) {
-  chatDataChannels[peer_id] = peerConnections[peer_id].createDataChannel(
-    "videolify_chat_channel"
-  );
+  chatDataChannels[peer_id] = peerConnections[peer_id].createDataChannel("videolify_chat_channel");
   chatDataChannels[peer_id].onopen = (event) => {
     console.log("chatDataChannels created", event);
   };
@@ -4971,12 +4703,7 @@ function handleSpeechTranscript(config) {
 
   let time_stamp = getFormatDate(new Date());
   let name = config.peer_name;
-  let avatar_image =
-    avatarApiUrl +
-    "?name=" +
-    name +
-    "&size=32" +
-    "&background=random&rounded=true";
+  let avatar_image = avatarApiUrl + "?name=" + name + "&size=32" + "&background=random&rounded=true";
   let transcipt = config.text_data;
 
   console.log("Handle speech transcript", config);
@@ -5172,9 +4899,7 @@ function searchPeer() {
   let msgerPeerInputarea = getEcN("msger-peer-inputarea");
   searchPeerBarName = searchPeerBarName.toLowerCase();
   for (let i = 0; i < msgerPeerInputarea.length; i++) {
-    if (
-      !msgerPeerInputarea[i].innerHTML.toLowerCase().includes(searchPeerBarName)
-    ) {
+    if (!msgerPeerInputarea[i].innerHTML.toLowerCase().includes(searchPeerBarName)) {
       msgerPeerInputarea[i].style.display = "none";
     } else {
       msgerPeerInputarea[i].style.display = "flex";
@@ -5232,13 +4957,7 @@ function addMsgerPrivateBtn(msgerPrivateBtn, msgerPrivateMsgInput, peerId) {
     }
     let toPeerName = msgerPrivateBtn.value;
     emitMsg(myPeerName, toPeerName, pMsg, true, peerId);
-    appendMessage(
-      myPeerName,
-      rightChatAvatar,
-      "right",
-      pMsg + "<hr>Private message to " + toPeerName,
-      true
-    );
+    appendMessage(myPeerName, rightChatAvatar, "right", pMsg + "<hr>Private message to " + toPeerName, true);
     msgerPrivateMsgInput.value = "";
     msgerCP.style.display = "none";
   }
@@ -5256,8 +4975,7 @@ function checkMsg(text) {
   if (text.trim().length == 0) return;
   if (isHtml(text)) return stripHtml(text);
   if (isValidHttpURL(text)) {
-    if (isImageURL(text))
-      return '<img src="' + text + '" alt="img" width="180" height="auto"/>';
+    if (isImageURL(text)) return '<img src="' + text + '" alt="img" width="180" height="auto"/>';
     return '<a href="' + text + '" target="_blank">' + text + "</a>";
   }
   if (isChatMarkdownOn) return marked.parse(text);
@@ -5394,9 +5112,7 @@ function hideShowEmojiPicker() {
  */
 function downloadChatMsgs() {
   let a = document.createElement("a");
-  a.href =
-    "data:text/json;charset=utf-8," +
-    encodeURIComponent(JSON.stringify(chatMessages, null, 1));
+  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chatMessages, null, 1));
   a.download = getDataTimeString() + "-CHAT.txt";
   document.body.appendChild(a);
   a.click();
@@ -5410,9 +5126,7 @@ function downloadChatMsgs() {
  */
 function downloadCaptions() {
   let a = document.createElement("a");
-  a.href =
-    "data:text/json;charset=utf-8," +
-    encodeURIComponent(JSON.stringify(transcripts, null, 1));
+  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(transcripts, null, 1));
   a.download = getDataTimeString() + roomId + "-CAPTIONS.txt";
   document.body.appendChild(a);
   a.click();
@@ -5430,10 +5144,7 @@ function hideShowMySettings() {
     if (isMobileDevice) {
       mySettings.style.setProperty("width", "100%");
       mySettings.style.setProperty("height", "100%");
-      document.documentElement.style.setProperty(
-        "--mySettings-select-w",
-        "99%"
-      );
+      document.documentElement.style.setProperty("--mySettings-select-w", "99%");
     }
     // my current peer name
     myPeerNameSet.placeholder = myPeerName;
@@ -5510,8 +5221,7 @@ function handlePeerName(config) {
   let msgerPeerName = getId(peer_id + "_pMsgBtn");
   let msgerPeerAvatar = getId(peer_id + "_pMsgAvatar");
   if (msgerPeerName) msgerPeerName.value = peer_name;
-  if (msgerPeerAvatar)
-    msgerPeerAvatar.src = `${avatarApiUrl}?name=${peer_name}&size=24&background=random&rounded=true`;
+  if (msgerPeerAvatar) msgerPeerAvatar.src = `${avatarApiUrl}?name=${peer_name}&size=24&background=random&rounded=true`;
   // refresh also peer video avatar name
   setPeerAvatarImgName(peer_id + "_avatar", useAvatarApi);
 }
@@ -5556,17 +5266,9 @@ function setMyAudioStatus(status) {
   myAudioStatusIcon.className = className.audioOn + (status ? "" : "-slash");
   // send my audio status to all peers in the room
   emitPeerStatus("audio", status);
-  setTippy(
-    myAudioStatusIcon,
-    status ? "You're unmuted" : "You're muted",
-    "bottom"
-  );
+  setTippy(myAudioStatusIcon, status ? "You're unmuted" : "You're muted", "bottom");
   status ? playSound("on") : playSound("off");
-  setTippy(
-    audioBtn,
-    status ? "Click to mute" : "Click to unmute",
-    "right-start"
-  );
+  setTippy(audioBtn, status ? "Click to mute" : "Click to unmute", "right-start");
 }
 
 /**
@@ -5575,26 +5277,13 @@ function setMyAudioStatus(status) {
  */
 function setMyVideoStatus(status) {
   // on vdeo OFF display my video avatar name
-  if (myVideoAvatarImage)
-    myVideoAvatarImage.style.display = status ? "none" : "block";
-  if (myVideoStatusIcon)
-    myVideoStatusIcon.className = status
-      ? className.videoOn
-      : className.videoOff;
+  if (myVideoAvatarImage) myVideoAvatarImage.style.display = status ? "none" : "block";
+  if (myVideoStatusIcon) myVideoStatusIcon.className = status ? className.videoOn : className.videoOff;
   // send my video status to all peers in the room
   emitPeerStatus("video", status);
   if (!isMobileDevice) {
-    if (myVideoStatusIcon)
-      setTippy(
-        myVideoStatusIcon,
-        status ? "My video is on" : "My video is off",
-        "bottom"
-      );
-    setTippy(
-      videoBtn,
-      status ? "Turn off video" : "Turn on video",
-      "right-start"
-    );
+    if (myVideoStatusIcon) setTippy(myVideoStatusIcon, status ? "My video is on" : "My video is off", "bottom");
+    setTippy(videoBtn, status ? "Turn off video" : "Turn on video", "right-start");
   }
   status ? playSound("on") : playSound("off");
 }
@@ -5650,11 +5339,7 @@ function setPeerAudioStatus(peer_id, status) {
   let peerAudioStatus = getId(peer_id + "_audioStatus");
   if (peerAudioStatus) {
     peerAudioStatus.className = className.audioOn + (status ? "" : "-slash");
-    setTippy(
-      peerAudioStatus,
-      status ? "Participant is unmuted" : "Participant is muted",
-      "bottom"
-    );
+    setTippy(peerAudioStatus, status ? "Participant is unmuted" : "Participant is muted", "bottom");
     status ? playSound("on") : playSound("off");
   }
 }
@@ -5686,8 +5371,7 @@ function handlePeerAudioBtn(peer_id) {
   if (!buttons.remote.audioBtnClickAllowed) return;
   let peerAudioBtn = getId(peer_id + "_audioStatus");
   peerAudioBtn.onclick = () => {
-    if (peerAudioBtn.className === className.audioOn)
-      disablePeer(peer_id, "audio");
+    if (peerAudioBtn.className === className.audioOn) disablePeer(peer_id, "audio");
   };
 }
 
@@ -5699,8 +5383,7 @@ function handlePeerVideoBtn(peer_id) {
   if (!useVideo || !buttons.remote.videoBtnClickAllowed) return;
   let peerVideoBtn = getId(peer_id + "_videoStatus");
   peerVideoBtn.onclick = () => {
-    if (peerVideoBtn.className === className.videoOn)
-      disablePeer(peer_id, "video");
+    if (peerVideoBtn.className === className.videoOn) disablePeer(peer_id, "video");
   };
 }
 
@@ -5745,13 +5428,7 @@ function sendPrivateMsgToPeer(toPeerId, toPeerName) {
         return;
       }
       emitMsg(myPeerName, toPeerName, pMsg, true, toPeerId);
-      appendMessage(
-        myPeerName,
-        rightChatAvatar,
-        "right",
-        pMsg + "<br/><hr>Private message to " + toPeerName,
-        true
-      );
+      appendMessage(myPeerName, rightChatAvatar, "right", pMsg + "<br/><hr>Private message to " + toPeerName, true);
       userLog("toast", "Message sent to " + toPeerName + " 👍");
     }
   });
@@ -5787,15 +5464,10 @@ function handlePeerVideoAudioUrl(peer_id) {
 function setPeerVideoStatus(peer_id, status) {
   let peerVideoAvatarImage = getId(peer_id + "_avatar");
   let peerVideoStatus = getId(peer_id + "_videoStatus");
-  if (peerVideoAvatarImage)
-    peerVideoAvatarImage.style.display = status ? "none" : "block";
+  if (peerVideoAvatarImage) peerVideoAvatarImage.style.display = status ? "none" : "block";
   if (peerVideoStatus) {
     peerVideoStatus.className = className.videoOn + (status ? "" : "-slash");
-    setTippy(
-      peerVideoStatus,
-      status ? "Participant video is on" : "Participant video is off",
-      "bottom"
-    );
+    setTippy(peerVideoStatus, status ? "Participant video is on" : "Participant video is off", "bottom");
     status ? playSound("on") : playSound("off");
   }
 }
@@ -5976,10 +5648,7 @@ function disableAllPeers(element) {
     background: swalBackground,
     position: "center",
     imageUrl: element == "audio" ? audioOffImg : camOffImg,
-    title:
-      element == "audio"
-        ? "Mute everyone except yourself?"
-        : "Hide everyone except yourself?",
+    title: element == "audio" ? "Mute everyone except yourself?" : "Hide everyone except yourself?",
     text:
       element == "audio"
         ? "Once muted, you won't be able to unmute them, but they can unmute themselves at any time."
@@ -6022,8 +5691,7 @@ function disablePeer(peer_id, element) {
     background: swalBackground,
     position: "center",
     imageUrl: element == "audio" ? audioOffImg : camOffImg,
-    title:
-      element == "audio" ? "Mute this participant?" : "Hide this participant?",
+    title: element == "audio" ? "Mute this participant?" : "Hide this participant?",
     text:
       element == "audio"
         ? "Once muted, you won't be able to unmute them, but they can unmute themselves at any time."
@@ -6119,11 +5787,7 @@ function handleRoomStatus(config) {
   switch (action) {
     case "lock":
       playSound("locked");
-      userLog(
-        "toast",
-        peer_name + " has 🔒 LOCKED the room by password",
-        "top-end"
-      );
+      userLog("toast", peer_name + " has 🔒 LOCKED the room by password", "top-end");
       elemDisplay(lockRoomBtn, false);
       elemDisplay(unlockRoomBtn, true);
       isRoomLocked = true;
@@ -6211,9 +5875,7 @@ function handleUnlockTheRoom() {
  * Handle whiteboard toogle
  */
 function handleWhiteboardToggle() {
-  thereIsPeerConnections()
-    ? whiteboardAction(getWhiteboardAction("toggle"))
-    : toggleWhiteboard();
+  thereIsPeerConnections() ? whiteboardAction(getWhiteboardAction("toggle")) : toggleWhiteboard();
 }
 
 /**
@@ -6257,18 +5919,12 @@ function setupWhiteboardCanvasSize() {
     wbCanvas.setWidth(optimalSize[0] * scaleFactorX);
     wbCanvas.setHeight(optimalSize[1] * scaleFactorX);
     wbCanvas.setZoom(scaleFactorX);
-    setWhiteboardSize(
-      optimalSize[0] * scaleFactorX,
-      optimalSize[1] * scaleFactorX
-    );
+    setWhiteboardSize(optimalSize[0] * scaleFactorX, optimalSize[1] * scaleFactorX);
   } else if (scaleFactorX > scaleFactorY && scaleFactorY < 1) {
     wbCanvas.setWidth(optimalSize[0] * scaleFactorY);
     wbCanvas.setHeight(optimalSize[1] * scaleFactorY);
     wbCanvas.setZoom(scaleFactorY);
-    setWhiteboardSize(
-      optimalSize[0] * scaleFactorY,
-      optimalSize[1] * scaleFactorY
-    );
+    setWhiteboardSize(optimalSize[0] * scaleFactorY, optimalSize[1] * scaleFactorY);
   } else {
     wbCanvas.setWidth(optimalSize[0]);
     wbCanvas.setHeight(optimalSize[1]);
@@ -6733,9 +6389,7 @@ function handleWhiteboardAction(config, logme = true) {
  * @param {string} peer_id socket.id
  */
 function createFileSharingDataChannel(peer_id) {
-  fileDataChannels[peer_id] = peerConnections[peer_id].createDataChannel(
-    "videolify_file_sharing_channel"
-  );
+  fileDataChannels[peer_id] = peerConnections[peer_id].createDataChannel("videolify_file_sharing_channel");
   fileDataChannels[peer_id].binaryType = "arraybuffer";
   fileDataChannels[peer_id].onopen = (event) => {
     console.log("fileDataChannels created", event);
@@ -6751,10 +6405,7 @@ function handleDataChannelFileSharing(data) {
   receiveBuffer.push(data);
   receivedSize += data.byteLength;
   receiveProgress.value = receivedSize;
-  receiveFilePercentage.innerHTML =
-    "Receive progress: " +
-    ((receivedSize / incomingFileInfo.file.fileSize) * 100).toFixed(2) +
-    "%";
+  receiveFilePercentage.innerHTML = "Receive progress: " + ((receivedSize / incomingFileInfo.file.fileSize) * 100).toFixed(2) + "%";
   if (receivedSize === incomingFileInfo.file.fileSize) {
     receiveFileDiv.style.display = "none";
     incomingFileData = receiveBuffer;
@@ -6772,14 +6423,7 @@ function handleDataChannelFileSharing(data) {
  * @param {boolean} broadcast sent to all or not
  */
 function sendFileData(peer_id, broadcast) {
-  console.log(
-    "Send file " +
-      fileToSend.name +
-      " size " +
-      bytesToSize(fileToSend.size) +
-      " type " +
-      fileToSend.type
-  );
+  console.log("Send file " + fileToSend.name + " size " + bytesToSize(fileToSend.size) + " type " + fileToSend.type);
 
   sendInProgress = true;
 
@@ -6799,12 +6443,8 @@ function sendFileData(peer_id, broadcast) {
   fileReader = new FileReader();
   let offset = 0;
 
-  fileReader.addEventListener("error", (err) =>
-    console.error("fileReader error", err)
-  );
-  fileReader.addEventListener("abort", (e) =>
-    console.log("fileReader aborted", e)
-  );
+  fileReader.addEventListener("error", (err) => console.error("fileReader error", err));
+  fileReader.addEventListener("abort", (e) => console.log("fileReader aborted", e));
   fileReader.addEventListener("load", (e) => {
     if (!sendInProgress) return;
 
@@ -6818,17 +6458,13 @@ function sendFileData(peer_id, broadcast) {
     offset += data.fileData.byteLength;
 
     sendProgress.value = offset;
-    sendFilePercentage.innerHTML =
-      "Send progress: " + ((offset / fileToSend.size) * 100).toFixed(2) + "%";
+    sendFilePercentage.innerHTML = "Send progress: " + ((offset / fileToSend.size) * 100).toFixed(2) + "%";
 
     // send file completed
     if (offset === fileToSend.size) {
       sendInProgress = false;
       sendFileDiv.style.display = "none";
-      userLog(
-        "success",
-        "The file " + fileToSend.name + " was sent successfully."
-      );
+      userLog("success", "The file " + fileToSend.name + " was sent successfully.");
     }
 
     if (offset < fileToSend.size) readSlice(offset);
@@ -6836,13 +6472,13 @@ function sendFileData(peer_id, broadcast) {
   const readSlice = (o) => {
     for (let peer_id in fileDataChannels) {
       if (fileDataChannels[peer_id].bufferedAmount > fileDataChannels[peer_id].bufferedAmountLowThreshold) {
-          fileDataChannels[peer_id].onbufferedamountlow = () => {
-              fileDataChannels[peer_id].onbufferedamountlow = null;
-              readSlice(0);
-          };
-          return;
+        fileDataChannels[peer_id].onbufferedamountlow = () => {
+          fileDataChannels[peer_id].onbufferedamountlow = null;
+          readSlice(0);
+        };
+        return;
       }
-  }
+    }
     const slice = fileToSend.slice(offset, o + chunkSize);
     fileReader.readAsArrayBuffer(slice);
   };
@@ -6859,16 +6495,12 @@ function sendFSData(data) {
   if (broadcast) {
     // send to all peers
     for (let peer_id in fileDataChannels) {
-      if (fileDataChannels[peer_id].readyState === "open")
-        fileDataChannels[peer_id].send(data.fileData);
+      if (fileDataChannels[peer_id].readyState === "open") fileDataChannels[peer_id].send(data.fileData);
     }
   } else {
     // send to peer
     for (let peer_id in fileDataChannels) {
-      if (
-        peer_id_to_send == peer_id &&
-        fileDataChannels[peer_id].readyState === "open"
-      ) {
+      if (peer_id_to_send == peer_id && fileDataChannels[peer_id].readyState === "open") {
         fileDataChannels[peer_id].send(data.fileData);
       }
     }
@@ -6973,13 +6605,7 @@ function sendFileInformations(file, peer_id, broadcast = false) {
       },
     };
     // keep trace of sent file in chat
-    appendMessage(
-      myPeerName,
-      rightChatAvatar,
-      "right",
-      "Send file: \n" + toHtmlJson(fileInfo),
-      false
-    );
+    appendMessage(myPeerName, rightChatAvatar, "right", "Send file: \n" + toHtmlJson(fileInfo), false);
     // send some metadata about our file to peers in the room
     sendToServer("fileInfo", fileInfo);
     // send the File
@@ -7060,10 +6686,7 @@ function endDownload() {
         background: swalBackground,
         position: "center",
         title: "Received file",
-        text:
-          incomingFileInfo.file.fileName +
-          " size " +
-          bytesToSize(incomingFileInfo.file.fileSize),
+        text: incomingFileInfo.file.fileName + " size " + bytesToSize(incomingFileInfo.file.fileSize),
         imageUrl: e.target.result,
         imageAlt: "File-img-download",
         showDenyButton: true,
@@ -7090,10 +6713,7 @@ function endDownload() {
       imageUrl: fileSharingImg,
       position: "center",
       title: "Received file",
-      text:
-        incomingFileInfo.file.fileName +
-        " size " +
-        bytesToSize(incomingFileInfo.file.fileSize),
+      text: incomingFileInfo.file.fileName + " size " + bytesToSize(incomingFileInfo.file.fileSize),
       showDenyButton: true,
       confirmButtonText: `Save`,
       denyButtonText: `Cancel`,
@@ -7163,10 +6783,7 @@ function sendVideoUrl(peer_id = null) {
                 https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3
             */
       if (!isVideoTypeSupported(result.value)) {
-        return userLog(
-          "warning",
-          "Something wrong, try with another Video or audio URL"
-        );
+        return userLog("warning", "Something wrong, try with another Video or audio URL");
       }
       let is_youtube = getVideoType(result.value) == "na" ? true : false;
       let video_url = is_youtube ? getYoutubeEmbed(result.value) : result.value;
@@ -7237,13 +6854,7 @@ function getVideoType(url) {
  * @returns boolean true/false
  */
 function isVideoTypeSupported(url) {
-  if (
-    url.endsWith(".mp4") ||
-    url.endsWith(".mp3") ||
-    url.endsWith(".webm") ||
-    url.endsWith(".ogg") ||
-    url.includes("youtube.com")
-  )
+  if (url.endsWith(".mp4") || url.endsWith(".mp3") || url.endsWith(".webm") || url.endsWith(".ogg") || url.includes("youtube.com"))
     return true;
   return false;
 }
@@ -7254,12 +6865,9 @@ function isVideoTypeSupported(url) {
  * @returns {string} YouTube Embed URL
  */
 function getYoutubeEmbed(url) {
-  let regExp =
-    /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+  let regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
   let match = url.match(regExp);
-  return match && match[7].length == 11
-    ? "https://www.youtube.com/embed/" + match[7] + "?autoplay=1"
-    : false;
+  return match && match[7].length == 11 ? "https://www.youtube.com/embed/" + match[7] + "?autoplay=1" : false;
 }
 
 /**
@@ -7271,8 +6879,7 @@ function closeVideoUrlPlayer() {
     videoAudioUrlElement: videoAudioUrlElement.src,
   });
   if (videoUrlIframe.src != "") videoUrlIframe.setAttribute("src", "");
-  if (videoAudioUrlElement.src != "")
-    videoAudioUrlElement.setAttribute("src", "");
+  if (videoAudioUrlElement.src != "") videoAudioUrlElement.setAttribute("src", "");
   videoUrlCont.style.display = "none";
   videoAudioUrlCont.style.display = "none";
   isVideoUrlPlayerOpen = false;
@@ -7377,10 +6984,7 @@ function handleKickedOut(config) {
     imageUrl: kickedOutImg,
     title: "Kicked out!",
     html:
-      `<h2 style="color: #FF2D00;">` +
-      `User ` +
-      peer_name +
-      `</h2> will kick out you after <b style="color: #FF2D00;"></b> milliseconds.`,
+      `<h2 style="color: #FF2D00;">` + `User ` + peer_name + `</h2> will kick out you after <b style="color: #FF2D00;"></b> milliseconds.`,
     timer: 10000,
     timerProgressBar: true,
     didOpen: () => {
@@ -7532,11 +7136,11 @@ function handlePeerVolume(data) {
     element.style.backgroundColor = "orange";
   }
   element.style.height = volume + "%";
-  remoteVideoWrap.classList.toggle('speaking');
-    setTimeout(function () {
-        element.style.backgroundColor = '#19bb5c';
-        element.style.height = '0%';
-        remoteVideoWrap.classList.toggle('speaking');
+  remoteVideoWrap.classList.toggle("speaking");
+  setTimeout(function () {
+    element.style.backgroundColor = "#19bb5c";
+    element.style.height = "0%";
+    remoteVideoWrap.classList.toggle("speaking");
   }, 700);
 }
 
@@ -7545,18 +7149,18 @@ function handlePeerVolume(data) {
  * @param {object} data my audio
  */
 function handleMyVolume(data) {
-  let element = getId('myPitchBar');
+  let element = getId("myPitchBar");
   let volume = data.volume + 25;
   if (!element) return;
   if (volume > 50) {
-      element.style.backgroundColor = 'orange';
+    element.style.backgroundColor = "orange";
   }
-  element.style.height = volume + '%';
-  myVideoWrap.classList.toggle('speaking');
+  element.style.height = volume + "%";
+  myVideoWrap.classList.toggle("speaking");
   setTimeout(function () {
-      element.style.backgroundColor = '#19bb5c';
-      element.style.height = '0%';
-      myVideoWrap.classList.toggle('speaking');
+    element.style.backgroundColor = "#19bb5c";
+    element.style.height = "0%";
+    myVideoWrap.classList.toggle("speaking");
   }, 700);
 }
 
@@ -7697,9 +7301,7 @@ function toggleClassElements(className, displayState) {
  * @return {boolean} true/false
  */
 function isTablet(userAgent) {
-  return /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(
-    userAgent
-  );
+  return /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(userAgent);
 }
 
 /**
